@@ -61,13 +61,13 @@ def widget_wrapper():
                     net_avg, resample, cellprob_threshold, 
                     model_match_threshold, do_3D, stitch_threshold):
         from cellpose import models
-        from cellpose.io import logger
+        import logging
 
         flow_threshold = (31.0 - model_match_threshold) / 10.
         if model_match_threshold==0.0:
             flow_threshold = 0.0
-            logger.info('flow_threshold=0 => no masks thrown out due to model mismatch')
-        logger.info(f'computing masks with cellprob_threshold={cellprob_threshold}, flow_threshold={flow_threshold}')
+            logging.info('flow_threshold=0 => no masks thrown out due to model mismatch')
+        logging.info(f'computing masks with cellprob_threshold={cellprob_threshold}, flow_threshold={flow_threshold}')
         if model_type=='custom':
             CP = models.CellposeModel(pretrained_model=custom_model, gpu=True)
         else:
@@ -108,14 +108,15 @@ def widget_wrapper():
         from cellpose.utils import fill_holes_and_remove_small_masks
         from cellpose.dynamics import get_masks
         from cellpose.transforms import resize_image
-        from cellpose.io import logger
+
+        import logging
 
         #print(flows_orig[3].shape, flows_orig[2].shape, masks_orig.shape)
         flow_threshold = (31.0 - model_match_threshold) / 10.
         if model_match_threshold==0.0:
             flow_threshold = 0.0
-            logger.info('flow_threshold=0 => no masks thrown out due to model mismatch')
-        logger.info(f'computing masks with cellprob_threshold={cellprob_threshold}, flow_threshold={flow_threshold}')
+            logging.info('flow_threshold=0 => no masks thrown out due to model mismatch')
+        logging.info(f'computing masks with cellprob_threshold={cellprob_threshold}, flow_threshold={flow_threshold}')
         maski = get_masks(flows_orig[3].copy(), iscell=(flows_orig[2] > cellprob_threshold),
                         flows=flows_orig[1], threshold=flow_threshold*(masks_orig.ndim<3))
         maski = fill_holes_and_remove_small_masks(maski)
@@ -167,7 +168,8 @@ def widget_wrapper():
         output_outlines
     ) -> None:
         # Import when users activate plugin
-        from cellpose.io import logger
+        from cellpose.io import logger_setup
+        logger, _ = logger_setup()
 
         if not hasattr(widget, 'cellpose_layers'):
             widget.cellpose_layers = []
@@ -294,17 +296,17 @@ def widget_wrapper():
         mask_worker.start()
 
     def _report_diameter(diam):
-        from cellpose.io import logger
+        import logging
 
         widget.diameter.value = diam
-        logger.info(f'computed diameter = {diam}')
+        logging.info(f'computed diameter = {diam}')
     
     @widget.compute_diameter_button.changed.connect 
     def _compute_diameter(e: Any):
-        from cellpose.io import logger
+        import logging
 
         if widget.model_type.value == 'custom':
-            logger.error('cannot compute diameter for custom model')
+            logging.error('cannot compute diameter for custom model')
         else:
             model_type = widget.model_type.value
             channels = [max(0, widget.main_channel.value), max(0, widget.optional_nuclear_channel.value)],
