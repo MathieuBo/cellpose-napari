@@ -60,7 +60,8 @@ def widget_wrapper():
     def run_cellpose(image, model_type, custom_model, channels, channel_axis, diameter,
                     net_avg, resample, cellprob_threshold, 
                     model_match_threshold, do_3D, stitch_threshold):
-        from cellpose import models, logger
+        from cellpose import models
+        from cellpose.io import logger
 
         flow_threshold = (31.0 - model_match_threshold) / 10.
         if model_match_threshold==0.0:
@@ -107,7 +108,7 @@ def widget_wrapper():
         from cellpose.utils import fill_holes_and_remove_small_masks
         from cellpose.dynamics import get_masks
         from cellpose.transforms import resize_image
-        from cellpose import logger
+        from cellpose.io import logger
 
         #print(flows_orig[3].shape, flows_orig[2].shape, masks_orig.shape)
         flow_threshold = (31.0 - model_match_threshold) / 10.
@@ -166,7 +167,7 @@ def widget_wrapper():
         output_outlines
     ) -> None:
         # Import when users activate plugin
-        from cellpose import logger
+        from cellpose.io import logger
 
         if not hasattr(widget, 'cellpose_layers'):
             widget.cellpose_layers = []
@@ -264,7 +265,7 @@ def widget_wrapper():
 
 
     def update_masks(masks):
-        from cellpose import logger
+        from cellpose.io import logger
         from cellpose.utils import masks_to_outlines
 
         outlines = masks_to_outlines(masks) * masks
@@ -293,14 +294,14 @@ def widget_wrapper():
         mask_worker.start()
 
     def _report_diameter(diam):
-        from cellpose import logger
+        from cellpose.io import logger
 
         widget.diameter.value = diam
         logger.info(f'computed diameter = {diam}')
     
     @widget.compute_diameter_button.changed.connect 
     def _compute_diameter(e: Any):
-        from cellpose import logger
+        from cellpose.io import logger
 
         if widget.model_type.value == 'custom':
             logger.error('cannot compute diameter for custom model')
